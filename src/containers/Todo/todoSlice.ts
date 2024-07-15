@@ -44,6 +44,14 @@ export const todoSlice = createSlice({
     }).addCase(getTodo.rejected, (state: TodoState) => {
       state.isLoading = false;
       state.error = true;
+    }).addCase(addTodo.pending, (state: TodoState) => {
+      state.error = false;
+      state.isLoading = true;
+    }).addCase(addTodo.fulfilled, (state: TodoState) => {
+      state.isLoading = false;
+    }).addCase(addTodo.rejected, (state: TodoState) => {
+      state.error = true;
+      state.isLoading = false;
     });
   }
 });
