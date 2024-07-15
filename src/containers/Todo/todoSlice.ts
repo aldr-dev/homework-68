@@ -19,12 +19,17 @@ export const addTodo = createAsyncThunk<ApiTodo, string>('todo/addTodo', async (
   return response.data;
 });
 
+export const toggleCheckedTodo = createAsyncThunk<ApiTodo, string>('todo/checkedTodo', async (id: string) => {
+  const response = await axiosApi.put<ApiTodo>(`/todos/${id}.json`, {completed: true});
+  return response.data;
+});
+
 export const todoSlice = createSlice({
   name: 'todo',
   initialState,
   reducers: {
-    increase: (state) => {
-     console.log(state);
+    todo: (state) => {
+      return state;
     },
   },
   extraReducers: (builder) => {
@@ -52,9 +57,21 @@ export const todoSlice = createSlice({
     }).addCase(addTodo.rejected, (state: TodoState) => {
       state.error = true;
       state.isLoading = false;
+    }).addCase(toggleCheckedTodo.pending, (state: TodoState) => {
+      state.error = false;
+      state.isLoading = true;
+    }).addCase(toggleCheckedTodo.fulfilled, (state:TodoState, action: PayloadAction<mutationApiTodo> )  => {
+      state.isLoading = false;
+      const foundIndex = state.todos.findIndex((item) => item.id === action.payload.id);
+        if (foundIndex !== -1) {
+          state.todos[foundIndex].completed = true;
+        }
+    }).addCase(toggleCheckedTodo.rejected, (state: TodoState) => {
+      state.error = true;
+      state.isLoading = false;
     });
   }
 });
 
 export const todoReducer = todoSlice.reducer;
-export const {increase} = todoSlice.actions;
+export const {todo} = todoSlice.actions;
