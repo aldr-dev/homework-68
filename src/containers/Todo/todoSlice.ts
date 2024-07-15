@@ -19,19 +19,20 @@ export const addTodo = createAsyncThunk<ApiTodo, string>('todo/addTodo', async (
   return response.data;
 });
 
-export const toggleCheckedTodo = createAsyncThunk<ApiTodo, string>('todo/checkedTodo', async (id: string) => {
-  const response = await axiosApi.put<ApiTodo>(`/todos/${id}.json`, {completed: true});
+export const toggleCheckedTodo = createAsyncThunk<mutationApiTodo, string>('todo/toggleCheckedTodo', async (id: string) => {
+  const response = await axiosApi.put<mutationApiTodo>(`/todos/${id}.json`, {completed: true});
   return response.data;
+});
+
+export const deleteTodo = createAsyncThunk<mutationApiTodo, string>('todo/deleteTodo', async (id: string) => {
+  const response = await axiosApi.delete<mutationApiTodo>(`/todos/${id}.json`);
+  return response.data.id;
 });
 
 export const todoSlice = createSlice({
   name: 'todo',
   initialState,
-  reducers: {
-    todo: (state) => {
-      return state;
-    },
-  },
+  reducers: {todo: (state: TodoState) => state},
   extraReducers: (builder) => {
     builder.addCase(getTodo.pending, (state: TodoState) => {
       state.error = false;
@@ -67,6 +68,14 @@ export const todoSlice = createSlice({
           state.todos[foundIndex].completed = true;
         }
     }).addCase(toggleCheckedTodo.rejected, (state: TodoState) => {
+      state.error = true;
+      state.isLoading = false;
+    }).addCase(deleteTodo.pending, (state: TodoState) => {
+      state.error = false;
+      state.isLoading = true;
+    }).addCase(deleteTodo.fulfilled, (state: TodoState, action: PayloadAction<mutationApiTodo>) => {
+      state.todos = state.todos.filter((todo) => todo.id !== action.payload.id);
+    }).addCase(deleteTodo.rejected, (state: TodoState) => {
       state.error = true;
       state.isLoading = false;
     });
