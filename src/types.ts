@@ -1,5 +1,5 @@
 export interface ApiTodo {
-  message: string;
+  title: string;
   completed: boolean;
 }
 

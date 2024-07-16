@@ -1,4 +1,4 @@
-import {ApiTodo, mutationApiTodo, TodoState} from '../types';
+import {ApiTodo, mutationApiTodo, TodoState} from '../../types';
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import axiosApi from '../../axiosApi';
 import {RootState} from '../../app/store';
@@ -14,15 +14,16 @@ export const getTodo = createAsyncThunk<mutationApiTodo, void, {state: RootState
   return response.data || null;
 });
 
-export const addTodo = createAsyncThunk<ApiTodo, string>('todo/addTodo', async (message: string) => {
-  const response = await axiosApi.post<ApiTodo>('/todos.json', {message, completed: false});
+export const addTodo = createAsyncThunk('todo/addTodo', async (title: string) => {
+  const response = await axiosApi.post<ApiTodo>('/todos.json', {title, completed: false});
   return response.data;
 });
 
-export const toggleCheckedTodo = createAsyncThunk<mutationApiTodo, string>('todo/toggleCheckedTodo', async (id: string) => {
-  const response = await axiosApi.put<mutationApiTodo>(`/todos/${id}.json`, {completed: true});
-  return response.data;
-});
+export const toggleCheckedTodo = createAsyncThunk('todo/toggleCheckedTodo', async ({ id, completed, title }) => {
+    const response = await axiosApi.put<mutationApiTodo>(`/todos/${id}.json`, {title, completed: !completed });
+    return response.data;
+  }
+);
 
 export const deleteTodo = createAsyncThunk<mutationApiTodo, string>('todo/deleteTodo', async (id: string) => {
   const response = await axiosApi.delete<mutationApiTodo>(`/todos/${id}.json`);
@@ -65,7 +66,7 @@ export const todoSlice = createSlice({
       state.isLoading = false;
       const foundIndex = state.todos.findIndex((item) => item.id === action.payload.id);
         if (foundIndex !== -1) {
-          state.todos[foundIndex].completed = true;
+          state.todos[foundIndex].completed = action.payload.completed;
         }
     }).addCase(toggleCheckedTodo.rejected, (state: TodoState) => {
       state.error = true;

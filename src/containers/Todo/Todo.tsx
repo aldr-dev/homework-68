@@ -1,34 +1,38 @@
 import React, {useEffect} from 'react';
-import './Todo.css';
 import {AppDispatch, RootState} from '../../app/store';
 import {useDispatch, useSelector} from 'react-redux';
-import {deleteTodo, getTodo, toggleCheckedTodo} from './todoSlice';
+import {getTodo} from './todoSlice';
 import TodoForm from '../../components/TodoForm/TodoForm';
+import TodoItem from '../../components/TodoItem/TodoItem';
+import './Todo.css';
+import Preloader from '../../components/Preloader/Preloader';
 
 const Todo = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const todos = useSelector((state: RootState) => state.todo.todos);
+  const isLoader = useSelector((state: RootState) => state.todo.isLoading);
 
   useEffect(() => {
     dispatch(getTodo());
-  }, [dispatch, todos]);
+  }, [dispatch]);
 
   return (
-    <div>
-      <TodoForm/>
-
-      {todos && (
-        <>
-          {todos.map((todo) => (
-            <div key={todo.id}>
-              <span>{todo.message}</span>
-              <input type="checkbox" checked={todo.completed} onChange={() => dispatch(toggleCheckedTodo(todo.id))}/>
-              <button onClick={() => dispatch(deleteTodo(todo.id))} type="button">Delete</button>
-            </div>
-          ))}
-        </>
-      )}
-    </div>
+    <>
+      <Preloader preloader={isLoader} />
+      <div className="container">
+        <h1 className="title-app">ToDo List</h1>
+        <TodoForm/>
+        <div className={todos.length > 0 ? 'container-todo-item' : ''}>
+          {todos && (
+            <>
+              {todos.map((todo) => (
+                <TodoItem key={todo.id} todo={todo}/>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 
